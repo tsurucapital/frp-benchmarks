@@ -1,0 +1,6 @@
+[submodule "modules/euphoria"]
+	path = modules/euphoria
+	url = git://github.com/tsurucapital/euphoria.git
+[submodule "modules/ordrea"]
+	path = modules/ordrea
+	url = https://github.com/takano-akio/ordrea.git
