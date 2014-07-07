@@ -25,6 +25,10 @@ library
         , sodium          == 0.10.0.0
         , euphoria        == 0.4.8.0
         , ordrea          == 0.2.0.0
+        , impulse         == 0.1.0.0
+        , chronograph
+        , thyme
+        , vector-space
 
     ghc-options: -fno-state-hack
     exposed-modules:
@@ -43,6 +47,8 @@ executable sodium-bench
            , mwc-random
            , time
            , sodium
+           , thyme
+           , vector-space
     ghc-options: -main-is Benchmark.Sodium
                  
 executable euphoria-bench
@@ -66,6 +72,20 @@ executable banana-bench
            , time
            , reactive-banana
     ghc-options: -main-is Benchmark.Banana
+
+executable impulse-bench
+    Main-is: src/Benchmark/Impulse.hs
+    build-depends:
+             frp-benchmarks
+           , base
+           , containers
+           , mwc-random
+           , time
+           , impulse
+           , thyme
+           , vector-space
+    ghc-options: -main-is Benchmark.Impulse
+
 
 executable ordrea-bench
     Main-is: src/Benchmark/Ordrea.hs

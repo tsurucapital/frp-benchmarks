@@ -15,13 +15,16 @@ import FRP.Sodium
 import FRP.Sodium.Internal (ioReactive)
 import Control.Monad
 import Control.Applicative
-import Data.Time
+-- import Data.Time
 import System.Random.MWC
 import qualified Data.IntMap as IM
 import Text.Printf
 import System.IO
 import System.Mem
 import Data.Maybe
+
+import Data.Thyme
+import Data.AffineSpace
 
 benchmark1 :: Int -> Int -> IO (NominalDiffTime, NominalDiffTime)
 benchmark1 netsize dur = do
@@ -40,11 +43,17 @@ benchmark1 netsize dur = do
 
   forM_ [1..dur] $ \step -> do
       let str = show step
+      let blorp act = do
+            t0 <- ioReactive getCurrentTime
+            () <- act str
+            t1 <- ioReactive getCurrentTime
+            ioReactive $ print ("action: ", t1 .-. t0)
+
       evs <- replicateM 10 $ uniformR (0,netsize-1) randGen
-      sync $ forM_ evs (\ev -> maybe (error "sodium bench1: trigger not found") ($ str) $ IM.lookup ev trigMap)
+      sync $ forM_ evs (\ev -> maybe (error "sodium bench1: trigger not found") (blorp) $ IM.lookup ev trigMap)
   endTime <- getCurrentTime
   sequence_ unreg
-  return (midTime `diffUTCTime` startTime, endTime `diffUTCTime` midTime)
+  return (midTime .-. startTime, endTime .-. midTime)
 
 benchmark2 :: Int -> Int -> IO (NominalDiffTime, NominalDiffTime)
 benchmark2 netsize dur = do
@@ -74,7 +83,7 @@ benchmark2 netsize dur = do
           sample selectedB
       ePutStrLn (show (val :: Int))
   endTime <- getCurrentTime
-  return (midTime `diffUTCTime` startTime, endTime `diffUTCTime` midTime)
+  return (midTime .-. startTime, endTime .-. midTime)
 
 data Box = Box (Behavior [Event Int])
 fromBox :: Box -> Behavior (Event Int)
@@ -122,7 +131,7 @@ benchmark3 netsize dur = do
   -- un-register the listener afterwards to prevent holding on to/printing from
   -- old streams.
   endTime <- getCurrentTime
-  return (midTime `diffUTCTime` startTime, endTime `diffUTCTime` midTime)
+  return (midTime .-. startTime, endTime .-. midTime)
 
 main :: IO ()
 main = do
@@ -137,7 +146,8 @@ main = do
 
     let benches = [("benchmark 1", benchmark1)
                   ,("benchmark 2", benchmark2)
-                  ,("benchmark 3", benchmark3)]
+                  ,("benchmark 3", benchmark3)
+                  ]
         durs    = [100,1000]
         sizes   = [100,1000,10000,100000]
         restrictions = []
