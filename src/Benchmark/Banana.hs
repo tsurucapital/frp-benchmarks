@@ -25,16 +25,14 @@ benchmark1 netsize dur = do
   let trigMap = IM.fromList $ zip [0..netsize-1] triggers
   let networkD :: forall t. Frameworks t => Moment t ()
       networkD = do
-          evs <- mapM fromAddHandler addHandlers
-          reactimate $ ePutStrLn <$> unions evs
-
           {-
-           - this implementation is slower (20-30%) than doing unions and a single
-           - reactimate
+           - this implementation was slower (20-30%) than doing unions and a single
+           - reactimate.
+           - no longer true with reactive-banana-0.8
+           -}
           forM_ addHandlers $ \addHandler -> do
               ev <- fromAddHandler addHandler
               reactimate $ ePutStrLn <$> ev
-              -}
   network <- compile networkD
   actuate network
   midTime <- getCurrentTime

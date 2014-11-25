@@ -21,8 +21,8 @@ library
         , time
 
         , netwire         == 4.0.5
-        , reactive-banana == 0.7.1.3
-        , sodium          == 0.10.0.0
+        , reactive-banana == 0.8.*
+        , sodium          == 0.10.0.*
         , euphoria        == 0.4.8.0
         , ordrea          == 0.2.0.0
         , impulse         == 0.1.0.0
@@ -34,6 +34,7 @@ library
     exposed-modules:
         Benchmark.Netwire
         Benchmark.Banana
+        Benchmark.Impulse
         Benchmark.Sodium
         Benchmark.Euphoria
         Benchmark.Ordrea
@@ -84,7 +85,7 @@ executable impulse-bench
            , impulse
            , thyme
            , vector-space
-    ghc-options: -main-is Benchmark.Impulse
+    ghc-options: -main-is Benchmark.Impulse -rtsopts
 
 
 executable ordrea-bench

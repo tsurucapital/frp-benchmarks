@@ -10,7 +10,6 @@ module Benchmark.Impulse (
 ) where
 import Reactive.Impulse
 import Control.Applicative
-import Data.Monoid
 import Control.Monad
 import Data.Thyme
 import Data.AffineSpace
@@ -30,15 +29,13 @@ benchmark1 netsize dur = do
 
           mapM_ (\ev -> reactimate $ ePutStrLn <$> ev) evs
           return trigMap
-  (trigMap, network) <- compileNetwork networkD
-  startNetwork network
+  (trigMap, _network) <- compileNetwork networkD
   midTime <- getCurrentTime
 
   randGen <- create
   forM_ [1..dur] $ \step -> do
       let str = show step
       replicateM_ 10 $ do
-          -- stuff appears to be getting collected too soon :(
           ev <- uniformR (0,netsize-1) randGen
           maybe (error "not found!") ($ str) $ IM.lookup ev trigMap
   endTime <- getCurrentTime
@@ -59,12 +56,11 @@ benchmark2 netsize dur = do
           let selectedB_E = head <$> accumE countBs (keepTail <$ step10E)
 
           let selectedB = switchB (head countBs) selectedB_E
-          let outputE = applyB stepE (const . ePutStrLn . show <$> selectedB)
+          let outputE = applyB stepE (const . ePutStrLn . ("Output " ++) . show <$> selectedB)
           reactimate outputE
           return (stepTrigger, trigMap)
 
-  ((stepTrigger, trigMap), network) <- compileNetwork networkD
-  startNetwork network
+  ((stepTrigger, trigMap), _network) <- compileNetwork networkD
 
   midTime <- getCurrentTime
   randGen <- create
@@ -73,7 +69,7 @@ benchmark2 netsize dur = do
       randomRs <- replicateM 10 $ uniformR (0,netsize-1) randGen
 
       stepTrigger step
-      forM_ randomRs $ \ev -> maybe (error "banana bench2: trigger not found") ($ ()) $ IM.lookup ev trigMap
+      forM_ randomRs $ \ev -> maybe (error "impulse bench2: trigger not found") ($ ()) $ IM.lookup ev trigMap
   endTime <- getCurrentTime
   return (midTime .-. startTime, endTime .-. midTime)
 
@@ -85,12 +81,12 @@ main = do
             (setup, run) <- bench netsize dur
             putStrLn $ printf "setup: %s\nruntime: %s" (show setup) (show run)
     let benches = [ ("benchmark 1", benchmark1)
-                  , ("benchmark 2", benchmark2)
+                    -- ("benchmark 2", benchmark2)
                   ]
-        -- durs    = [100]
-        -- sizes   = [100]
-        durs    = [100,1000]
-        sizes   = [100,1000,10000]
+        durs    = [1000]
+        sizes   = [10000]
+        -- durs    = [100,1000]
+        -- sizes   = [100,1000,10000]
     sequence_ $ testN <$> benches <*> sizes <*> durs
 
 

@@ -47,7 +47,7 @@ benchmark1 netsize dur = do
             t0 <- ioReactive getCurrentTime
             () <- act str
             t1 <- ioReactive getCurrentTime
-            ioReactive $ print ("action: ", t1 .-. t0)
+            ioReactive $ ePutStrLn $ show ("action: ", t1 .-. t0)
 
       evs <- replicateM 10 $ uniformR (0,netsize-1) randGen
       sync $ forM_ evs (\ev -> maybe (error "sodium bench1: trigger not found") (blorp) $ IM.lookup ev trigMap)
@@ -146,10 +146,11 @@ main = do
 
     let benches = [("benchmark 1", benchmark1)
                   ,("benchmark 2", benchmark2)
-                  ,("benchmark 3", benchmark3)
+                  -- ,("benchmark 3", benchmark3)
                   ]
         durs    = [100,1000]
-        sizes   = [100,1000,10000,100000]
+        sizes   = [100,1000,10000]
+        -- sizes   = [100,1000,10000,100000]
         restrictions = []
     sequence_ $ testN restrictions <$> benches <*> sizes <*> durs
 
